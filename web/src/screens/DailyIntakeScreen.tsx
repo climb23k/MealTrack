@@ -8,7 +8,7 @@ import {
   Group,
   Button,
   AppShell,
-  Header,
+  Box,
   Stack,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
@@ -28,7 +28,7 @@ import { useAuth } from '../contexts/AuthContext';
 export default function DailyIntakeScreen() {
   const { logout } = useAuth();
   const [stats, setStats] = useState<api.DailyStats | null>(null);
-  const [loading, setLoading] = useState(true);
+
 
   const loadStats = async () => {
     try {
@@ -41,8 +41,6 @@ export default function DailyIntakeScreen() {
         message: 'Failed to load daily stats',
         color: 'red',
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -62,10 +60,12 @@ export default function DailyIntakeScreen() {
 
   return (
     <AppShell
+      header={{ height: 60 }}
       padding="md"
-      header={
-        <Header height={60} p="xs">
-          <Group position="apart">
+    >
+      <AppShell.Header>
+        <Box p="xs">
+          <Group justify="space-between">
             <Title order={2}>MealTrack</Title>
             <Group>
               <Button component={Link} to="/" variant="subtle">
@@ -76,16 +76,15 @@ export default function DailyIntakeScreen() {
               </Button>
             </Group>
           </Group>
-        </Header>
-      }
-    >
+        </Box>
+      </AppShell.Header>
       <Container size="md">
         <Title order={3} mb="xl">
           Daily Intake
         </Title>
 
         {stats && (
-          <Stack spacing="xl">
+          <Stack gap="xl">
             <Card shadow="sm" p="lg">
               <BarChart
                 width={600}
