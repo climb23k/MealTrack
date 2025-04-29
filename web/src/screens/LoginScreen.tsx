@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TextInput, Button, Paper, Title, Container, Stack } from '@mantine/core';
+import { TextInput, Button, Paper, Title, Container, Stack, MantineTheme } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
 import { notifications } from '@mantine/notifications';
 import { useAuth } from '../contexts/AuthContext';
@@ -41,10 +41,12 @@ export default function LoginScreen() {
   return (
     <Container size={420} my={40}>
       <Title
-        align="center"
-        sx={(theme) => ({
-          fontFamily: \`Greycliff CF, \${theme.fontFamily}\`,
-          fontWeight: 900,
+        ta="center"
+        styles={(theme: MantineTheme) => ({
+          root: {
+            fontFamily: `Greycliff CF, ${theme.fontFamily}`,
+            fontWeight: 900,
+          },
         })}
       >
         Welcome to MealTrack
