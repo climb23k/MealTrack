@@ -10,12 +10,12 @@ import {
   Button,
   Stack,
   Image,
-  AppShell,
-  Header,
   FileInput,
   NumberInput,
   Modal,
   Select,
+  Box,
+  AppShell,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useDisclosure } from '@mantine/hooks';
@@ -24,60 +24,73 @@ import dayjs from 'dayjs';
 import * as api from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
+interface Meal {
+  id: string;
+  date: string;
+  calories: number;
+  protein: number;
+  confidence: 'High' | 'Low';
+  glucose_readings: Array<{
+    value: number;
+    timestamp: string;
+  }>;
+  image_url?: string;
+}
+
 export default function MealFeedScreen() {
   const { logout } = useAuth();
-  const [meals, setMeals] = useState<api.Meal[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [meals, setMeals] = useState<Meal[]>([]);
   const [opened, { open, close }] = useDisclosure(false);
   const [newMeal, setNewMeal] = useState({
     calories: 0,
     protein: 0,
-    confidence: 'Low' as 'High' | 'Low',
+    confidence: 'High' as 'High' | 'Low',
     image: null as File | null,
   });
 
-  const loadMeals = async () => {
+  useEffect(() => {
+    fetchMeals();
+  }, []);
+
+  const fetchMeals = async () => {
     try {
       const data = await api.getMeals();
-      setMeals(data);
+      setMeals(data.map(meal => ({
+        ...meal,
+        id: meal.id.toString(),
+      })));
     } catch (error) {
       notifications.show({
         title: 'Error',
-        message: 'Failed to load meals',
+        message: 'Failed to fetch meals',
         color: 'red',
       });
-    } finally {
-      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadMeals();
-  }, []);
-
   const handleAddMeal = async () => {
-    const formData = new FormData();
-    formData.append('calories', newMeal.calories.toString());
-    formData.append('protein', newMeal.protein.toString());
-    formData.append('confidence', newMeal.confidence);
-    if (newMeal.image) {
-      formData.append('image', newMeal.image);
-    }
-
     try {
+      const formData = new FormData();
+      formData.append('calories', newMeal.calories.toString());
+      formData.append('protein', newMeal.protein.toString());
+      formData.append('confidence', newMeal.confidence);
+      if (newMeal.image) {
+        formData.append('image', newMeal.image);
+      }
+
       await api.addMeal(formData);
+      await fetchMeals();
+      close();
+      setNewMeal({
+        calories: 0,
+        protein: 0,
+        confidence: 'High',
+        image: null,
+      });
       notifications.show({
         title: 'Success',
         message: 'Meal added successfully',
         color: 'green',
-      });
-      close();
-      loadMeals();
-      setNewMeal({
-        calories: 0,
-        protein: 0,
-        confidence: 'Low',
-        image: null,
       });
     } catch (error) {
       notifications.show({
@@ -91,9 +104,10 @@ export default function MealFeedScreen() {
   return (
     <AppShell
       padding="md"
-      header={
-        <Header height={60} p="xs">
-          <Group position="apart">
+    >
+      <AppShell.Header h={60}>
+        <Box p="xs" style={{ height: 60, borderBottom: '1px solid #eee' }}>
+          <Group justify="space-between">
             <Title order={2}>MealTrack</Title>
             <Group>
               <Button component={Link} to="/stats" variant="subtle">
@@ -104,20 +118,20 @@ export default function MealFeedScreen() {
               </Button>
             </Group>
           </Group>
-        </Header>
-      }
-    >
+        </Box>
+      </AppShell.Header>
+
       <Container size="md">
-        <Group position="apart" mb="xl">
+        <Group justify="space-between" mb="xl">
           <Title order={3}>Meal Feed</Title>
           <Button onClick={open}>Add Meal</Button>
         </Group>
 
-        <Stack spacing="md">
+        <Stack gap="md">
           {meals.map((meal) => (
             <Card key={meal.id} shadow="sm" p="lg">
-              <Group position="apart" mb="xs">
-                <Text weight={500}>
+              <Group justify="space-between" mb="xs">
+                <Text fw={500}>
                   {dayjs(meal.date).format('MMM D, YYYY h:mm A')}
                 </Text>
                 <Badge color={meal.confidence === 'High' ? 'green' : 'yellow'}>
@@ -125,18 +139,18 @@ export default function MealFeedScreen() {
                 </Badge>
               </Group>
 
-              <Group spacing="xl">
+              <Group gap="xs">
                 <div>
                   <Text size="sm" color="dimmed">
                     Calories
                   </Text>
-                  <Text weight={500}>{meal.calories}</Text>
+                  <Text fw={500}>{meal.calories}</Text>
                 </div>
                 <div>
                   <Text size="sm" color="dimmed">
                     Protein
                   </Text>
-                  <Text weight={500}>{meal.protein}g</Text>
+                  <Text fw={500}>{meal.protein}g</Text>
                 </div>
               </Group>
 
@@ -151,7 +165,7 @@ export default function MealFeedScreen() {
 
               {meal.glucose_readings.length > 0 && (
                 <Card.Section mt="md" p="md">
-                  <Text size="sm" weight={500} mb="xs">
+                  <Text size="sm" fw={500} mb="xs">
                     Glucose Readings
                   </Text>
                   <LineChart
@@ -190,7 +204,7 @@ export default function MealFeedScreen() {
               label="Calories"
               value={newMeal.calories}
               onChange={(val) =>
-                setNewMeal({ ...newMeal, calories: val || 0 })
+                setNewMeal({ ...newMeal, calories: Number(val) || 0 })
               }
               min={0}
               required
@@ -199,7 +213,7 @@ export default function MealFeedScreen() {
               label="Protein (g)"
               value={newMeal.protein}
               onChange={(val) =>
-                setNewMeal({ ...newMeal, protein: val || 0 })
+                setNewMeal({ ...newMeal, protein: Number(val) || 0 })
               }
               min={0}
               required
@@ -207,9 +221,11 @@ export default function MealFeedScreen() {
             <Select
               label="Confidence Level"
               value={newMeal.confidence}
-              onChange={(val: 'High' | 'Low') =>
-                setNewMeal({ ...newMeal, confidence: val })
-              }
+              onChange={(value: string | null) => {
+                if (value === "High" || value === "Low") {
+                  setNewMeal({ ...newMeal, confidence: value });
+                }
+              }}
               data={[
                 { value: 'High', label: 'High Confidence' },
                 { value: 'Low', label: 'Low Confidence' },
@@ -220,7 +236,7 @@ export default function MealFeedScreen() {
               label="Meal Photo"
               accept="image/*"
               value={newMeal.image}
-              onChange={(file) => setNewMeal({ ...newMeal, image: file })}
+              onChange={(file: File | null) => setNewMeal({ ...newMeal, image: file })}
             />
             <Button onClick={handleAddMeal}>Add Meal</Button>
           </Stack>
