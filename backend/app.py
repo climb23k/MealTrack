@@ -77,10 +77,12 @@ def login_required(f):
 @app.route('/api/auth/login', methods=['POST'], endpoint='login')
 def login():
     data = request.json
+    print(f"Received login data: {data}")
     last_name = data.get('last_name')
     birthdate = data.get('birthdate')
 
     if not last_name or not birthdate:
+        print(f"Missing required fields: last_name={last_name}, birthdate={birthdate}")
         return jsonify({'error': 'Last name and birthdate required'}), 400
 
     try:

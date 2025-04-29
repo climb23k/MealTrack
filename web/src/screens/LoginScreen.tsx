@@ -25,7 +25,10 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      await login(lastName, birthdate.toISOString().split('T')[0]);
+      // Format date as YYYY-MM-DD
+      const formattedDate = birthdate.toISOString().slice(0, 10);
+      console.log('Sending date:', formattedDate);
+      await login(lastName, formattedDate);
       navigate('/');
     } catch (error) {
       notifications.show({
@@ -68,6 +71,7 @@ export default function LoginScreen() {
               placeholder="Pick your birthdate"
               value={birthdate}
               onChange={setBirthdate}
+              valueFormat="YYYY-MM-DD"
               required
             />
 
