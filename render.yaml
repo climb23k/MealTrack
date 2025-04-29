@@ -2,8 +2,7 @@ services:
   - type: web
     name: mealtrack-api
     env: docker
-    dockerfilePath: ./backend/Dockerfile
-    rootDirectory: backend
+    dockerfilePath: backend/Dockerfile
     envVars:
       - key: FLASK_ENV
         value: production
@@ -16,6 +15,4 @@ services:
 
 databases:
   - name: mealtrack-db
-    databaseName: mealtrack
-    user: mealtrack
     plan: free
