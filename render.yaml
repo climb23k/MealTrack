@@ -13,11 +13,15 @@ services:
       - key: SECRET_KEY
         generateValue: true
 
-  - type: web
+  - type: static
     name: mealtrack-web
     env: static
     buildCommand: cd web && npm install && npm run build
     staticPublishPath: web/dist
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
     routes:
       - type: rewrite
         source: /*
