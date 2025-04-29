@@ -3,7 +3,7 @@ services:
     name: mealtrack-api
     env: docker
     dockerfilePath: ./backend/Dockerfile
-    buildDirectory: backend
+    rootDirectory: backend
     envVars:
       - key: FLASK_ENV
         value: production
