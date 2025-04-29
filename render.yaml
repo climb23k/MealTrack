@@ -13,6 +13,19 @@ services:
       - key: SECRET_KEY
         generateValue: true
 
+  - type: web
+    name: mealtrack-web
+    env: static
+    buildCommand: cd web && npm install && npm run build
+    staticPublishPath: web/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        value: https://mealtrack-api.onrender.com
+
 databases:
   - name: mealtrack-db
     plan: free
