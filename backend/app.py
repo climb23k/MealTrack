@@ -74,7 +74,7 @@ def login_required(f):
     return decorated_function
 
 # Routes
-@app.route('/api/auth/login', methods=['POST'])
+@app.route('/api/auth/login', methods=['POST'], endpoint='login')
 def login():
     data = request.json
     last_name = data.get('last_name')
@@ -84,20 +84,27 @@ def login():
         return jsonify({'error': 'Last name and birthdate required'}), 400
 
     try:
-        birthdate = parse(birthdate).date()
-    except ValueError:
+        birthdate_obj = parse(birthdate)
+        birthdate = birthdate_obj.date()
+        print(f"Parsed birthdate: {birthdate}")
+    except ValueError as e:
+        print(f"Error parsing birthdate: {e}")
         return jsonify({'error': 'Invalid birthdate format'}), 400
 
-    user = User.query.filter_by(last_name=last_name, birthdate=birthdate).first()
+    # Case-insensitive last name comparison
+    user = User.query.filter(
+        db.func.lower(User.last_name) == last_name.lower(),
+        User.birthdate == birthdate
+    ).first()
+    print(f"Found user: {user}, Searching for last_name={last_name}, birthdate={birthdate}")
+    
     if not user:
-        user = User(last_name=last_name, birthdate=birthdate)
-        db.session.add(user)
-        db.session.commit()
+        return jsonify({'error': 'Invalid credentials'}), 401
 
     token = user.generate_token()
     return jsonify({'token': token})
 
-@app.route('/api/meals', methods=['GET'])
+@app.route('/api/meals', methods=['GET'], endpoint='get_meals')
 @login_required
 def get_meals():
     date = request.args.get('date')
@@ -134,7 +141,7 @@ def get_meals():
 
     return jsonify({'meals': meals_data})
 
-@app.route('/api/meals', methods=['POST'])
+@app.route('/api/meals', methods=['POST'], endpoint='add_meal')
 @login_required
 def add_meal():
     if 'image' not in request.files and 'image' not in request.form:
@@ -185,7 +192,7 @@ def add_meal():
         'image': base64.b64encode(meal.image).decode('utf-8') if meal.image else None
     })
 
-@app.route('/api/meals/<int:meal_id>/glucose', methods=['POST'])
+@app.route('/api/meals/<int:meal_id>/glucose', methods=['POST'], endpoint='add_glucose_reading')
 @login_required
 def add_glucose_reading(meal_id):
     meal = Meal.query.filter_by(id=meal_id, user_id=g.user_id).first()
@@ -216,7 +223,7 @@ def add_glucose_reading(meal_id):
         'value': reading.value
     })
 
-@app.route('/api/stats/daily', methods=['GET'])
+@app.route('/api/stats/daily', methods=['GET'], endpoint='get_daily_stats')
 @login_required
 def get_daily_stats():
     date = request.args.get('date')
