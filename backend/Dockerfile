@@ -13,4 +13,5 @@ ENV FLASK_ENV=production
 
 EXPOSE 8000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
+ENV PYTHONPATH=/app
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app", "--chdir", "/app"]
