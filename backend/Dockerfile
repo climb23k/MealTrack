@@ -13,5 +13,7 @@ ENV FLASK_ENV=production
 
 EXPOSE 8000
 
-ENV PYTHONPATH=/app
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:wsgi_app"]
+# Make run.py executable
+RUN chmod +x run.py
+
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "run:app"]
