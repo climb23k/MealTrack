@@ -3,10 +3,11 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Copy everything at once since we're having issues with individual file copies
-COPY . .
+COPY . /app/
 
 # Install dependencies
-RUN pip install -r requirements.txt
+WORKDIR /app
+RUN ls -la && pwd && pip install -r requirements.txt
 
 ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
