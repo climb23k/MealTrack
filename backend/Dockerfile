@@ -15,7 +15,4 @@ ENV PYTHONPATH=/app
 
 EXPOSE 8000
 
-# Create a symlink to make app.py importable
-RUN ln -s /app/app.py /app/wsgi.py
-
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--pythonpath", "/app", "wsgi:app"]
+CMD ["gunicorn", "wsgi:app", "--bind", "0.0.0.0:8000"]
