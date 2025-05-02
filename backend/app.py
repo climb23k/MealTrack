@@ -263,7 +263,12 @@ def get_daily_stats():
         'total_protein': total_protein
     })
 
+# Create tables
+with app.app_context():
+    db.create_all()
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
+
+# WSGI entry point
+wsgi_app = app
