@@ -2,12 +2,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy requirements first for better layer caching
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-# Copy the rest of the application code
+# Copy everything at once since we're having issues with individual file copies
 COPY . .
+
+# Install dependencies
+RUN pip install -r requirements.txt
 
 ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
