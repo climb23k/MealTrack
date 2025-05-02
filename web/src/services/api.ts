@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_URL = 'https://mealtrack-api.onrender.com';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -40,7 +40,7 @@ export interface DailyStats {
 
 // Auth
 export const login = async (lastName: string, birthdate: string) => {
-  const response = await api.post('/auth/login', { last_name: lastName, birthdate });
+  const response = await api.post('/api/auth/login', { last_name: lastName, birthdate });
   const { token } = response.data;
   localStorage.setItem('token', token);
   api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
