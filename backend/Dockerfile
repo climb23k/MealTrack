@@ -7,7 +7,7 @@ RUN echo 'Flask==3.0.0\nFlask-SQLAlchemy==3.1.1\nFlask-Cors==4.0.0\npython-doten
     pip install -r requirements.txt
 
 # Copy application code
-COPY . .
+COPY . /app/
 
 ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
@@ -15,9 +15,7 @@ ENV PYTHONPATH=/app
 
 EXPOSE 8000
 
-WORKDIR /app
+# Debug: show files and Python path
+RUN ls -la && echo "PYTHONPATH: $PYTHONPATH" && python -c "import sys; print('\n'.join(sys.path))"
 
-# Debug: show files
-RUN ls -la
-
-CMD ["gunicorn", "--chdir", "/app", "--bind", "0.0.0.0:8000", "app:app"]
+CMD ["python", "-m", "gunicorn", "app:app", "--bind", "0.0.0.0:8000"]
