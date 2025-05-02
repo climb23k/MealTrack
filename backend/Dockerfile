@@ -9,7 +9,7 @@ RUN echo 'Flask==3.0.0\nFlask-SQLAlchemy==3.1.1\nFlask-Cors==4.0.0\npython-doten
 # Copy application code
 COPY . /app/
 
-ENV FLASK_APP=app.py
+ENV FLASK_APP=mealtrack.app
 ENV FLASK_ENV=production
 ENV PYTHONPATH=/app
 
@@ -18,4 +18,4 @@ EXPOSE 8000
 # Debug: show files and Python path
 RUN ls -la && echo "PYTHONPATH: $PYTHONPATH" && python -c "import sys; print('\n'.join(sys.path))"
 
-CMD ["python", "-m", "gunicorn", "app:app", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "mealtrack:app", "--bind", "0.0.0.0:8000"]
