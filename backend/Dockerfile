@@ -15,4 +15,9 @@ ENV PYTHONPATH=/app
 
 EXPOSE 8000
 
-CMD ["gunicorn", "wsgi:app", "--bind", "0.0.0.0:8000"]
+WORKDIR /app
+
+# Debug: show files
+RUN ls -la
+
+CMD ["gunicorn", "--chdir", "/app", "--bind", "0.0.0.0:8000", "app:app"]
